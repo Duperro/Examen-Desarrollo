@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#142924">
+  <title>Panel del pesebre</title>
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="/panel.css">
+  <script type="module" src="/panel.js"></script>
+</head>
+<body>
+  <a class="salto" href="#contenido">Ir al contenido</a>
+  <aside class="lateral" aria-label="Navegación del panel">
+    <a class="marca" href="#resumen">
+      <span class="marca-icono" aria-hidden="true">✦</span>
+      <span><strong>El Pesebre</strong><small>Control de recursos</small></span>
+    </a>
+    <nav class="navegacion" aria-label="Secciones">
+      <a href="#resumen" aria-current="location"><span aria-hidden="true">▦</span> Resumen</a>
+      <a href="#inventario"><span aria-hidden="true">▤</span> Inventario</a>
+      <a href="#animales"><span aria-hidden="true">◉</span> Animales</a>
+      <a href="#actividad"><span aria-hidden="true">≋</span> Actividad API</a>
+      <a href="#arquitectura"><span aria-hidden="true">◇</span> Arquitectura</a>
+    </nav>
+    <div class="lateral-pie">
+      <span class="lateral-linea"></span>
+      <p>Desarrollo Basado en Plataformas</p>
+      <small>Escenario C · Rafael Bermeo</small>
+    </div>
+  </aside>
+
+  <main class="principal" id="contenido">
+    <header class="barra">
+      <span class="barra-titulo">Panel de operaciones</span>
+      <div class="barra-acciones">
+        <span id="conexion" class="conexion" data-estado="cargando" role="status">Conectando</span>
+        <button class="boton boton-secundario boton-clave" type="button" data-accion="clave" id="abrir-clave">Configurar clave</button>
+      </div>
+    </header>
+    <div class="contenido">
+      <section class="cabecera" id="resumen" aria-labelledby="titulo">
+        <div>
+          <h1 id="titulo">Gestión del pesebre</h1>
+          <p>Consulta el inventario, registra consumos y lleva el control de la alimentación.</p>
+        </div>
+        <button class="boton boton-dorado" type="button" data-accion="nuevo-recurso"><span aria-hidden="true">+</span> Nuevo recurso</button>
+      </section>
+
+      <div class="metricas" aria-label="Resumen de actividad">
+        <div class="metrica">
+          <span class="metrica-icono metrica-verde" aria-hidden="true">▤</span>
+          <div><span id="total-recursos" class="metrica-valor">—</span><span class="metrica-etiqueta">Recursos</span></div>
+        </div>
+        <div class="metrica">
+          <span class="metrica-icono metrica-ambar" aria-hidden="true">!</span>
+          <div><span id="total-bajo-stock" class="metrica-valor">—</span><span class="metrica-etiqueta">Stock bajo o agotado</span></div>
+        </div>
+        <div class="metrica">
+          <span class="metrica-icono metrica-violeta" aria-hidden="true">≋</span>
+          <div><span id="total-pendientes" class="metrica-valor">—</span><span class="metrica-etiqueta">Pendientes de reabastecer</span></div>
+        </div>
+        <div class="metrica">
+          <span class="metrica-icono metrica-azul" aria-hidden="true">◉</span>
+          <div><span id="total-sin-alimentar" class="metrica-valor">—</span><span class="metrica-etiqueta">Animales sin alimentar hoy</span></div>
+        </div>
+      </div>
+
+      <div id="aviso" class="aviso" role="status" hidden></div>
+
+      <section class="panel" id="inventario" aria-labelledby="titulo-inventario">
+        <header class="panel-cabecera">
+          <div><h2 id="titulo-inventario">Inventario</h2><p>Existencias, mínimos y estado de los recursos.</p></div>
+          <button class="boton boton-secundario" type="button" data-accion="actualizar" id="actualizar">Actualizar</button>
+        </header>
+        <div class="filtros">
+          <input type="search" id="buscar-recurso" aria-label="Buscar recurso por nombre" placeholder="Buscar por nombre">
+          <select id="filtro-categoria" aria-label="Filtrar por categoría"><option value="">Todas las categorías</option></select>
+          <select id="filtro-estado" aria-label="Filtrar por estado"><option value="">Todos los estados</option></select>
+        </div>
+        <div class="tabla-scroll" tabindex="0" aria-label="Tabla de inventario">
+          <table>
+            <thead><tr><th scope="col">Recurso</th><th scope="col">Categoría</th><th scope="col">Cantidad</th><th scope="col">Mínimo</th><th scope="col">Estado</th><th scope="col">Acciones</th></tr></thead>
+            <tbody id="filas-recursos"><tr><td class="vacio" colspan="6">Cargando inventario…</td></tr></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="panel" id="animales" aria-labelledby="titulo-animales">
+        <header class="panel-cabecera">
+          <div><h2 id="titulo-animales">Animales</h2><p>Raciones diarias y última fecha de alimentación.</p></div>
+          <button class="boton boton-secundario" type="button" data-accion="nuevo-animal"><span aria-hidden="true">+</span> Nuevo animal</button>
+        </header>
+        <div class="filtros">
+          <select id="filtro-especie" aria-label="Filtrar por especie"><option value="">Todas las especies</option></select>
+        </div>
+        <div class="tabla-scroll" tabindex="0" aria-label="Tabla de animales">
+          <table>
+            <thead><tr><th scope="col">Animal</th><th scope="col">Especie</th><th scope="col">Ración diaria</th><th scope="col">Última alimentación</th><th scope="col">Acciones</th></tr></thead>
+            <tbody id="filas-animales"><tr><td class="vacio" colspan="5">Cargando animales…</td></tr></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="panel" id="actividad" aria-labelledby="titulo-actividad">
+        <header class="panel-cabecera">
+          <div><h2 id="titulo-actividad">Actividad API</h2><p>Abre una operación para ver su código HTTP y su respuesta JSON.</p></div>
+        </header>
+        <div class="actividad" id="lista-actividad"><p class="vacio-actividad">Las operaciones aparecerán aquí.</p></div>
+      </section>
+
+      <section class="panel panel-arquitectura" id="arquitectura" aria-labelledby="titulo-arquitectura">
+        <header class="panel-cabecera">
+          <div><h2 id="titulo-arquitectura">Arquitectura</h2><p>Capas de la API y recorrido del Fault SOAP hasta el 202.</p></div>
+          <a class="boton boton-secundario" href="/docs/arquitectura.png" target="_blank" rel="noopener">Abrir imagen</a>
+        </header>
+        <img class="diagrama" src="/docs/arquitectura.png" width="1840" height="1128" loading="lazy" alt="Diagrama de las capas REST y del flujo SOAP que conserva el stock al guardar un reabastecimiento pendiente.">
+      </section>
+    </div>
+  </main>
+
+  <dialog id="dialogo-clave" aria-labelledby="titulo-clave">
+    <div class="dialogo-interior">
+      <header class="dialogo-cabecera">
+        <h2 id="titulo-clave">Clave de acceso</h2>
+        <button aria-label="Cerrar" class="cerrar" type="button" data-accion="cerrar">×</button>
+      </header>
+      <p>Usa la clave de <code>ENCARGADO_PESEBRE</code> de <code>.env</code> para las operaciones protegidas. Se conserva durante esta visita.</p>
+      <form id="formulario-clave">
+        <label for="clave">Clave Bearer</label>
+        <input id="clave" type="password" required autocomplete="off">
+        <div class="dialogo-botones">
+          <button id="quitar-clave" class="boton boton-secundario" type="button" data-accion="quitar-clave" hidden>Quitar clave</button>
+          <button class="boton boton-primario" type="submit">Guardar clave</button>
+        </div>
+      </form>
+    </div>
+  </dialog>
+
+  <dialog id="dialogo-operacion" aria-labelledby="titulo-operacion">
+    <div class="dialogo-interior">
+      <header class="dialogo-cabecera">
+        <h2 id="titulo-operacion"></h2>
+        <button aria-label="Cerrar" class="cerrar" type="button" data-accion="cerrar">×</button>
+      </header>
+      <div id="detalle-operacion"></div>
+      <form id="formulario-operacion">
+        <div id="campos-operacion" class="campos"></div>
+        <p class="error-formulario" id="error-operacion" role="alert" hidden></p>
+        <div class="dialogo-botones">
+          <button class="boton boton-secundario" type="button" data-accion="cerrar">Cancelar</button>
+          <button class="boton boton-primario" id="enviar-operacion" type="submit">Guardar</button>
+        </div>
+      </form>
+    </div>
+  </dialog>
+</body>
+</html>

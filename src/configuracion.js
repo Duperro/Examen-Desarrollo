@@ -26,7 +26,13 @@ export function leerConfiguracion(entorno = process.env) {
 
   return {
     puerto,
-    clavesPorRol: { [ENCARGADO_PESEBRE]: encargado, [PASTOR]: pastor },
-    mercadoSoap: { url: urlMercado, accion: entorno.MERCADO_SOAP_ACTION?.trim() },
+    clavesPorRol: { 
+      [ENCARGADO_PESEBRE]: encargado, 
+      [PASTOR]: pastor 
+    },
+    mercadoSoap: { 
+      url: urlMercado, 
+      accion: entorno.MERCADO_SOAP_ACTION?.trim() 
+    },
   };
 }

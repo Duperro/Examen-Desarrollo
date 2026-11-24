@@ -41,6 +41,12 @@ Para comprobar el arranque, ejecuta `curl.exe -i http://127.0.0.1:3000/api/recur
 
 Usa **Authorization → Bearer Token** en Postman con la clave de `.env`. Las operaciones protegidas requieren `ENCARGADO_PESEBRE`. Una clave válida de `PASTOR` devuelve `403`. Una clave ausente o inválida devuelve `401`. Configura dos claves distintas para probar ambos roles.
 
+## Panel web local
+
+Con el servidor en marcha, abre `http://127.0.0.1:3000/` para consultar y filtrar recursos y animales, registrar consumos y alimentar a los animales. Usa **Configurar clave** con el valor de `API_KEY_ENCARGADO_PESEBRE` para crear, consumir, reabastecer o eliminar recursos. La clave se mantiene en memoria mientras la pestaña está abierta.
+
+**Actividad API** muestra el código HTTP y el JSON de las operaciones. Para reabastecimiento, compara la cantidad consultada antes de la petición con la cantidad de la respuesta. El resultado guardado aparece al actualizar el inventario. El código del panel está en `public/`.
+
 ## Arquitectura
 
 [![Diagrama del flujo REST, manejo de errores y reabastecimiento SOAP con respuesta 202](docs/arquitectura.png)](docs/arquitectura.png)
