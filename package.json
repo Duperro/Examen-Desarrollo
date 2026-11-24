@@ -1,0 +1,16 @@
+{
+  "name": "recursos-del-pesebre",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=22.16.0"
+  },
+  "scripts": {
+    "start": "node --env-file-if-exists=.env src/servidor.js",
+    "test": "node --test"
+  },
+  "dependencies": {
+    "@xmldom/xmldom": "0.9.12"
+  }
+}

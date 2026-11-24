@@ -1,0 +1,575 @@
+{
+  "info": {
+    "name": "Escenario C · Gestión de recursos del pesebre",
+    "description": "Casos del Parcial 1 de Desarrollo Basado en Plataformas para Rafael Alejandro Bermeo Macías. Ejecuta la colección en orden con la API y el Mercado SOAP configurados. Las claves se toman de las variables locales tokenEncargado y tokenPastor.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{tokenEncargado}}",
+        "type": "string"
+      }
+    ]
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://127.0.0.1:3000",
+      "type": "string"
+    },
+    {
+      "key": "tokenEncargado",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "tokenPastor",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "recursoId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "stockAntesFault",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "animalId",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "event": [
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "if (pm.response.code >= 400) {",
+          "    pm.test('El error usa el formato estándar de la API', function () {",
+          "        pm.expect(pm.response.headers.get('Content-Type')).to.match(/^application\\/json\\b/i);",
+          "        const error = pm.response.json();",
+          "        pm.expect(error).to.have.all.keys('codigo', 'mensaje', 'detalles', 'timestamp', 'ruta');",
+          "        pm.expect(error.codigo).to.be.a('string').and.not.be.empty;",
+          "        pm.expect(error.mensaje).to.be.a('string').and.not.be.empty;",
+          "        pm.expect(error.detalles).to.be.an('array');",
+          "        pm.expect(new Date(error.timestamp).toISOString()).to.equal(error.timestamp);",
+          "        pm.expect(error.ruta).to.equal(pm.variables.replaceIn(pm.request.url.getPath()));",
+          "    });",
+          "}"
+        ]
+      }
+    }
+  ],
+  "item": [
+    {
+      "name": "Inventario y seguridad",
+      "item": [
+        {
+          "name": "201 · Registrar paja",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.collectionVariables.set('recursoId', '');",
+                  "pm.collectionVariables.set('stockAntesFault', '');"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"201 · Guarda el ID del recurso creado\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "    const recurso = pm.response.json();",
+                  "    pm.expect(Number.isSafeInteger(recurso.id) && recurso.id > 0).to.equal(true);",
+                  "    pm.expect(recurso.categoria).to.equal('PAJA');",
+                  "    pm.expect(recurso.cantidad).to.equal(10);",
+                  "    pm.expect(recurso.estado).to.equal('DISPONIBLE');",
+                  "    pm.expect(pm.response.headers.get('Location')).to.equal('/api/recursos/' + recurso.id);",
+                  "    pm.collectionVariables.set('recursoId', String(recurso.id));",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Paja Postman {{$guid}}\",\n  \"categoria\": \"PAJA\",\n  \"cantidad\": 10,\n  \"stockMinimo\": 4\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{baseUrl}}/api/recursos"
+          }
+        },
+        {
+          "name": "400 · Entrada inválida",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"400 DATOS_INVALIDOS\", function () {",
+                  "    pm.response.to.have.status(400);",
+                  "    pm.expect(pm.response.json().codigo).to.equal('DATOS_INVALIDOS');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"X\",\n  \"categoria\": \"INVALIDA\",\n  \"cantidad\": -1,\n  \"stockMinimo\": 0\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{baseUrl}}/api/recursos"
+          }
+        },
+        {
+          "name": "401 · Sin token",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"401 TOKEN_REQUERIDO\", function () {",
+                  "    pm.response.to.have.status(401);",
+                  "    pm.expect(pm.response.json().codigo).to.equal('TOKEN_REQUERIDO');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "auth": {
+              "type": "noauth"
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Paja Postman {{$guid}}\",\n  \"categoria\": \"PAJA\",\n  \"cantidad\": 10,\n  \"stockMinimo\": 4\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{baseUrl}}/api/recursos"
+          }
+        },
+        {
+          "name": "403 · Rol PASTOR",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"403 ROL_INSUFICIENTE\", function () {",
+                  "    pm.response.to.have.status(403);",
+                  "    pm.expect(pm.response.json().codigo).to.equal('ROL_INSUFICIENTE');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenPastor}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Paja Postman {{$guid}}\",\n  \"categoria\": \"PAJA\",\n  \"cantidad\": 10,\n  \"stockMinimo\": 4\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{baseUrl}}/api/recursos"
+          }
+        },
+        {
+          "name": "404 · Recurso inexistente",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"404 RECURSO_INEXISTENTE\", function () {",
+                  "    pm.response.to.have.status(404);",
+                  "    pm.expect(pm.response.json().codigo).to.equal('RECURSO_INEXISTENTE');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "auth": {
+              "type": "noauth"
+            },
+            "header": [],
+            "url": "{{baseUrl}}/api/recursos/9007199254740991"
+          }
+        },
+        {
+          "name": "409 · Consumo superior al stock",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"409 STOCK_INSUFICIENTE\", function () {",
+                  "    pm.response.to.have.status(409);",
+                  "    pm.expect(pm.response.json().codigo).to.equal('STOCK_INSUFICIENTE');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"cantidad\": 11\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{baseUrl}}/api/recursos/{{recursoId}}/consumo"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Fault del Mercado de Belén",
+      "item": [
+        {
+          "name": "200 · Consultar stock antes del Fault",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"200 · Guarda la cantidad previa al Fault\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "    const recurso = pm.response.json();",
+                  "    pm.expect(recurso.id).to.equal(Number(pm.collectionVariables.get('recursoId')));",
+                  "    pm.expect(recurso.cantidad).to.equal(10);",
+                  "    pm.expect(recurso.estado).to.equal('DISPONIBLE');",
+                  "    pm.collectionVariables.set('stockAntesFault', String(recurso.cantidad));",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "auth": {
+              "type": "noauth"
+            },
+            "header": [],
+            "url": "{{baseUrl}}/api/recursos/{{recursoId}}"
+          }
+        },
+        {
+          "name": "202 · Provocar Fault con 999 unidades",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"202 · Reabastecimiento pendiente con el stock previo\", function () {",
+                  "    pm.response.to.have.status(202);",
+                  "    const recurso = pm.response.json();",
+                  "    const stockAnterior = pm.collectionVariables.get('stockAntesFault');",
+                  "    pm.expect(stockAnterior).to.match(/^\\d+$/);",
+                  "    pm.expect(recurso.id).to.equal(Number(pm.collectionVariables.get('recursoId')));",
+                  "    pm.expect(recurso.estado).to.equal('REABASTECIMIENTO_PENDIENTE');",
+                  "    pm.expect(recurso.cantidad).to.equal(Number(stockAnterior));",
+                  "    pm.expect(recurso.mensaje).to.match(/pendiente/i);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"cantidad\": 999\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{baseUrl}}/api/recursos/{{recursoId}}/reabastecimiento",
+            "description": "El valor 999 provoca el Fault del Mercado. Comprueba también el estado persistido en la siguiente petición."
+          }
+        },
+        {
+          "name": "200 · Verificar stock persistido después del Fault",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"200 · El inventario conserva la cantidad y el estado pendiente\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "    const recurso = pm.response.json();",
+                  "    const stockAnterior = pm.collectionVariables.get('stockAntesFault');",
+                  "    pm.expect(stockAnterior).to.match(/^\\d+$/);",
+                  "    pm.expect(recurso.id).to.equal(Number(pm.collectionVariables.get('recursoId')));",
+                  "    pm.expect(recurso.estado).to.equal('REABASTECIMIENTO_PENDIENTE');",
+                  "    pm.expect(recurso.cantidad).to.equal(Number(stockAnterior));",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "auth": {
+              "type": "noauth"
+            },
+            "header": [],
+            "url": "{{baseUrl}}/api/recursos/{{recursoId}}"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Regla de alimentación",
+      "item": [
+        {
+          "name": "201 · Preparar alimento",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"201 · Hay alimento para el animal de prueba\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "    const alimento = pm.response.json();",
+                  "    pm.expect(alimento.categoria).to.equal('ALIMENTO_ANIMALES');",
+                  "    pm.expect(alimento.cantidad).to.equal(10);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Alimento Postman {{$guid}}\",\n  \"categoria\": \"ALIMENTO_ANIMALES\",\n  \"cantidad\": 10,\n  \"stockMinimo\": 2\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{baseUrl}}/api/recursos"
+          }
+        },
+        {
+          "name": "201 · Registrar animal",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.collectionVariables.set('animalId', '');"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"201 · Guarda el ID del animal\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "    const animal = pm.response.json();",
+                  "    pm.expect(Number.isSafeInteger(animal.id) && animal.id > 0).to.equal(true);",
+                  "    pm.expect(animal.especie).to.equal('BUEY');",
+                  "    pm.expect(animal.racionDiaria).to.equal(3);",
+                  "    pm.expect(animal.ultimaAlimentacion).to.equal(null);",
+                  "    pm.collectionVariables.set('animalId', String(animal.id));",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "auth": {
+              "type": "noauth"
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Lucero Postman {{$guid}}\",\n  \"especie\": \"BUEY\",\n  \"racionDiaria\": 3\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{baseUrl}}/api/animales"
+          }
+        },
+        {
+          "name": "200 · Alimentar por primera vez",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"200 · La primera alimentación registra la fecha\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "    const animal = pm.response.json();",
+                  "    pm.expect(animal.id).to.equal(Number(pm.collectionVariables.get('animalId')));",
+                  "    pm.expect(animal.ultimaAlimentacion).to.match(/^\\d{4}-\\d{2}-\\d{2}$/);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "auth": {
+              "type": "noauth"
+            },
+            "header": [],
+            "url": "{{baseUrl}}/api/animales/{{animalId}}/alimentacion"
+          }
+        },
+        {
+          "name": "422 · Alimentar dos veces el mismo día",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"422 ANIMAL_YA_ALIMENTADO\", function () {",
+                  "    pm.response.to.have.status(422);",
+                  "    pm.expect(pm.response.json().codigo).to.equal('ANIMAL_YA_ALIMENTADO');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "auth": {
+              "type": "noauth"
+            },
+            "header": [],
+            "url": "{{baseUrl}}/api/animales/{{animalId}}/alimentacion"
+          }
+        }
+      ]
+    }
+  ]
+}
